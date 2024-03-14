@@ -17,11 +17,13 @@ public:
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
+    void displayFileText();
 
 private:
     //==============================================================================
     // Your private member variables go here...
-
-
+    juce::Label label;
+    juce::File myFile;
+    juce::String myContent;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
