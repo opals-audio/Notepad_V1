@@ -13,6 +13,12 @@ MainComponent::MainComponent()
     label.setText("Hello World", juce::NotificationType::dontSendNotification);
     label.setJustificationType(juce::Justification::centred);
 
+    textButton.setSize(150, 50);
+    addAndMakeVisible(textButton);
+    textButton.setTopLeftPosition(label.getX(), label.getBottom() + 50);
+    textButton.setButtonText("Whats the time??");
+    textButton.addListener(this);
+
     //Clear String 
     myContent.clear();
     //Load file contents into myFile and verify exists
@@ -23,7 +29,6 @@ MainComponent::MainComponent()
     }
 
     displayFileText();
-
     }
  
 MainComponent::~MainComponent()
@@ -43,9 +48,33 @@ void MainComponent::resized()
 
 }
 
-void MainComponent::displayFileText()
+void MainComponent::buttonClicked(juce::Button* button)
+{
+    auto output = myFile.createOutputStream();
+    if (!output->openedOk())
+    {
+        DBG("Failed To Open File");
+    }
+    bool readWholeFile = true;
+
+    if (readWholeFile)
+    {
+        auto stream = output.get();
+        stream->setPosition(0);
+        stream->truncate();
+        stream->writeText(juce::Time::getCurrentTime().toString(1,1,1,1),0,0,nullptr);
+        stream->flush();
+        displayFileText();
+    }
+}
+
+void MainComponent::changeFileText()
 {
 
+}
+
+void MainComponent::displayFileText()
+{
     //Open input and check opened ok - set safety bool true 
     std::unique_ptr<juce::FileInputStream> input(myFile.createInputStream());
     if (!input->openedOk())
