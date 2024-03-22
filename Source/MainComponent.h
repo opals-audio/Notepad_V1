@@ -18,7 +18,7 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
     void displayFileText();
-    void changeFileText();
+    void changeFileText(juce::String stringToAdd);
     void buttonClicked(juce::Button*) override;
 
 private:
@@ -27,6 +27,9 @@ private:
     juce::Label label;
     juce::File myFile;
     juce::String myContent;
+
+    juce::TextEditor textEditor;
     juce::TextButton textButton;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

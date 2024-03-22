@@ -1,4 +1,10 @@
 #include "MainComponent.h"
+/*Todo:
+    Look into Cmake & JUCE
+    Text input box - write to file
+    Display text with formatting
+*/
+
 
 //==============================================================================
 MainComponent::MainComponent()
@@ -13,11 +19,21 @@ MainComponent::MainComponent()
     label.setText("Hello World", juce::NotificationType::dontSendNotification);
     label.setJustificationType(juce::Justification::centred);
 
-    textButton.setSize(150, 50);
-    addAndMakeVisible(textButton);
+    textButton.setSize(150, 50);https://docs.juce.com/master/classUndoManager.html
     textButton.setTopLeftPosition(label.getX(), label.getBottom() + 50);
     textButton.setButtonText("Whats the time??");
     textButton.addListener(this);
+    addAndMakeVisible(textButton);
+
+    textEditor.setSize(400, 50);
+    textEditor.setTextToShowWhenEmpty("Type Here",juce::Colours::grey);
+    textEditor.onReturnKey = [this]
+        {
+            auto newText = textEditor.getText();
+            changeFileText(newText);
+            textEditor.clear();
+        };
+    addAndMakeVisible(textEditor);
 
     //Clear String 
     myContent.clear();
@@ -27,8 +43,21 @@ MainComponent::MainComponent()
     {
         DBG("File Doesn't Exist...");
     }
+    std::unique_ptr<juce::FileOutputStream> output = myFile.createOutputStream();
+    if (!output->openedOk())
+    {
+        DBG("Failed To Open File");
+    }
+    bool readWholeFile = true;
 
-    displayFileText();
+    //Clear File Text (for now)
+    if (readWholeFile)
+    {
+        auto& stream = output;
+        stream->setPosition(0);
+        stream->truncate();
+        displayFileText();
+    }
     }
  
 MainComponent::~MainComponent()
@@ -50,7 +79,7 @@ void MainComponent::resized()
 
 void MainComponent::buttonClicked(juce::Button* button)
 {
-    auto output = myFile.createOutputStream();
+    std::unique_ptr<juce::FileOutputStream> output = myFile.createOutputStream();
     if (!output->openedOk())
     {
         DBG("Failed To Open File");
@@ -59,7 +88,7 @@ void MainComponent::buttonClicked(juce::Button* button)
 
     if (readWholeFile)
     {
-        auto stream = output.get();
+        auto& stream = output;
         stream->setPosition(0);
         stream->truncate();
         stream->writeText(juce::Time::getCurrentTime().toString(1,1,1,1),0,0,nullptr);
@@ -68,9 +97,23 @@ void MainComponent::buttonClicked(juce::Button* button)
     }
 }
 
-void MainComponent::changeFileText()
+void MainComponent::changeFileText(juce::String stringToAdd)
 {
+    std::unique_ptr<juce::FileOutputStream> output = myFile.createOutputStream();
+    if (!output->openedOk())
+    {
+        label.setText("Problem Writing To File! :(", juce::NotificationType::dontSendNotification);
+    }
+    bool readWholeFile = true;
 
+    if (readWholeFile)
+    {
+        //output->setPosition(0);
+        //output->truncate();
+        output->writeText(stringToAdd, 0, 0, "\r\n");
+        output->flush();
+        displayFileText();
+    }
 }
 
 void MainComponent::displayFileText()
